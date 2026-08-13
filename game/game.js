@@ -37,9 +37,7 @@ function gameLoop() {
         }
 
         player.style.transform =
-            "translate(calc(-50% + " +
-            x +
-            "px), -50%)";
+            "translate(calc(-50% + " + x + "px), -50%)";
     }
 
     requestAnimationFrame(gameLoop);
