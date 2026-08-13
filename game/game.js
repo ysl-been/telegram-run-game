@@ -1478,4 +1478,252 @@ function updateCamera() {
 }
 
 
-// =================================================
+// ==================================================
+// GAME LOOP
+// ==================================================
+
+function gameLoop() {
+
+    requestAnimationFrame(
+        gameLoop
+    );
+
+
+    updateGame();
+
+    updateCamera();
+
+
+    if (
+        renderer
+    ) {
+
+        renderer.render(
+            scene,
+            camera
+        );
+
+    }
+
+}
+
+
+// ==================================================
+// BUTTONS
+// ==================================================
+
+startButton.addEventListener(
+    "click",
+    function() {
+
+        startGame();
+
+    }
+);
+
+
+restartButton.addEventListener(
+    "click",
+    function() {
+
+        startGame();
+
+    }
+);
+
+
+// ==================================================
+// MOBILE CONTROLS
+// ==================================================
+
+document
+    .getElementById("leftButton")
+    .addEventListener(
+        "pointerdown",
+        function(event) {
+
+            event.preventDefault();
+
+            moveLeft();
+
+        }
+    );
+
+
+document
+    .getElementById("rightButton")
+    .addEventListener(
+        "pointerdown",
+        function(event) {
+
+            event.preventDefault();
+
+            moveRight();
+
+        }
+    );
+
+
+document
+    .getElementById("jumpButton")
+    .addEventListener(
+        "pointerdown",
+        function(event) {
+
+            event.preventDefault();
+
+            jump();
+
+        }
+    );
+
+
+const duckButton =
+    document.getElementById(
+        "duckButton"
+    );
+
+
+duckButton.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        startDuck();
+
+    }
+);
+
+
+duckButton.addEventListener(
+    "pointerup",
+    function(event) {
+
+        event.preventDefault();
+
+        stopDuck();
+
+    }
+);
+
+
+duckButton.addEventListener(
+    "pointercancel",
+    function() {
+
+        stopDuck();
+
+    }
+);
+
+
+// ==================================================
+// KEYBOARD CONTROLS
+// ==================================================
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.code ===
+            "ArrowLeft"
+        ) {
+
+            moveLeft();
+
+        }
+
+
+        if (
+            event.code ===
+            "ArrowRight"
+        ) {
+
+            moveRight();
+
+        }
+
+
+        if (
+            event.code ===
+            "ArrowUp" ||
+            event.code ===
+            "Space"
+        ) {
+
+            event.preventDefault();
+
+            jump();
+
+        }
+
+
+        if (
+            event.code ===
+            "ArrowDown"
+        ) {
+
+            startDuck();
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    function(event) {
+
+        if (
+            event.code ===
+            "ArrowDown"
+        ) {
+
+            stopDuck();
+
+        }
+
+    }
+);
+
+
+// ==================================================
+// RESIZE
+// ==================================================
+
+function handleResize() {
+
+    if (
+        !camera ||
+        !renderer
+    ) {
+
+        return;
+
+    }
+
+
+    camera.aspect =
+        window.innerWidth /
+        window.innerHeight;
+
+
+    camera.updateProjectionMatrix();
+
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+
+}
+
+
+// ==================================================
+// START
+// ==================================================
+
+initializeGame();
