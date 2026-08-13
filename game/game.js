@@ -1,40 +1,83 @@
-console.log("GAME JS LOADED");
+const canvas = document.getElementById("gameCanvas");
 
-let scene;
-let camera;
-let renderer;
+const startButton = document.getElementById("startButton");
 
-let cube;
+let started = false;
 
-let running = false;
+let x = 0;
 
-const startButton =
-    document.getElementById("startButton");
-
-const menu =
-    document.getElementById("menu");
+let direction = 1;
 
 
-// ================================
-// CREATE 3D
-// ================================
+// 创建一个简单的测试物体
 
-function init() {
+const box = document.createElement("div");
 
-    console.log("THREE:", typeof THREE);
+box.style.position = "absolute";
 
-    if (typeof THREE === "undefined") {
+box.style.width = "80px";
 
-        alert(
-            "Three.js 没有加载成功！"
-        );
+box.style.height = "80px";
 
-        return;
+box.style.background = "red";
+
+box.style.left = "50%";
+
+box.style.top = "50%";
+
+box.style.transform = "translate(-50%, -50%)";
+
+box.style.borderRadius = "15px";
+
+box.style.zIndex = "10";
+
+canvas.appendChild(box);
+
+
+// 开始按钮
+
+startButton.addEventListener("click", function () {
+
+    started = true;
+
+    document.getElementById("menu").style.display = "none";
+
+});
+
+
+// 游戏循环
+
+function gameLoop() {
+
+    if (started) {
+
+        x += 2 * direction;
+
+        if (x > 150) {
+
+            direction = -1;
+
+        }
+
+        if (x < -150) {
+
+            direction = 1;
+
+        }
+
+        box.style.transform =
+            "translate(calc(-50% + " +
+            x +
+            "px), -50%)";
+
     }
 
+    requestAnimationFrame(gameLoop);
 
-    scene =
-        new THREE.Scene();
+}
+
+
+gameLoop();        new THREE.Scene();
 
 
     scene.background =
