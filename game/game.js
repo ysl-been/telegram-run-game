@@ -1,40 +1,230 @@
-// ========================================
-// 3D RUN - SIMPLE STABLE VERSION
-// ========================================
+console.log("GAME JS LOADED");
 
 let scene;
 let camera;
 let renderer;
 
-let player;
-let road;
+let cube;
 
-let obstacles = [];
-let coins = [];
+let running = false;
 
-let gameRunning = false;
+const startButton =
+    document.getElementById("startButton");
 
-let lives = 3;
-let score = 0;
-let coinCount = 0;
-let level = 1;
-
-let speed = 0.35;
-
-let lane = 0;
-let targetLane = 0;
-
-let jumping = false;
-let jumpVelocity = 0;
-
-let ducking = false;
-
-let obstacleTimer = 0;
-let coinTimer = 0;
+const menu =
+    document.getElementById("menu");
 
 
-// ========================================
-// HTML
+// ================================
+// CREATE 3D
+// ================================
+
+function init() {
+
+    console.log("THREE:", typeof THREE);
+
+    if (typeof THREE === "undefined") {
+
+        alert(
+            "Three.js 没有加载成功！"
+        );
+
+        return;
+    }
+
+
+    scene =
+        new THREE.Scene();
+
+
+    scene.background =
+        new THREE.Color(0x55aaff);
+
+
+    camera =
+        new THREE.PerspectiveCamera(
+            70,
+            window.innerWidth /
+            window.innerHeight,
+            0.1,
+            100
+        );
+
+
+    camera.position.z =
+        5;
+
+
+    renderer =
+        new THREE.WebGLRenderer({
+            antialias: true
+        });
+
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+
+
+    document
+        .getElementById("gameCanvas")
+        .appendChild(
+            renderer.domElement
+        );
+
+
+    // ============================
+    // LIGHT
+    // ============================
+
+    const light =
+        new THREE.DirectionalLight(
+            0xffffff,
+            3
+        );
+
+
+    light.position.set(
+        2,
+        4,
+        5
+    );
+
+
+    scene.add(light);
+
+
+    const ambient =
+        new THREE.AmbientLight(
+            0xffffff,
+            1
+        );
+
+
+    scene.add(ambient);
+
+
+    // ============================
+    // CUBE
+    // ============================
+
+    const geometry =
+        new THREE.BoxGeometry(
+            1,
+            1,
+            1
+        );
+
+
+    const material =
+        new THREE.MeshStandardMaterial({
+            color: 0xff3333
+        });
+
+
+    cube =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+
+    scene.add(cube);
+
+
+    animate();
+
+}
+
+
+// ================================
+// START BUTTON
+// ================================
+
+startButton.addEventListener(
+    "click",
+    function() {
+
+        console.log(
+            "START BUTTON CLICKED"
+        );
+
+
+        running = true;
+
+        menu.style.display =
+            "none";
+
+    }
+);
+
+
+// ================================
+// ANIMATION
+// ================================
+
+function animate() {
+
+    requestAnimationFrame(
+        animate
+    );
+
+
+    if (running) {
+
+        cube.rotation.x +=
+            0.02;
+
+        cube.rotation.y +=
+            0.03;
+
+    }
+
+
+    renderer.render(
+        scene,
+        camera
+    );
+
+}
+
+
+// ================================
+// RESIZE
+// ================================
+
+window.addEventListener(
+    "resize",
+    function() {
+
+        if (!camera || !renderer) {
+            return;
+        }
+
+
+        camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
+
+
+        camera.updateProjectionMatrix();
+
+
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight
+        );
+
+    }
+);
+
+
+// ================================
+// START
+// ================================
+
+init();// HTML
 // ========================================
 
 const startButton =
