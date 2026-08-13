@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-
 <html lang="zh-CN">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -11,30 +9,174 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     >
 
-    <title>🏃 Endless Run</title>
+    <title>3D Endless Run</title>
 
-    <link
-        rel="stylesheet"
-        href="style.css"
-    >
+    <link rel="stylesheet" href="style.css">
 
+    <!-- Three.js -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.min.js"></script>
 </head>
-
 
 <body>
 
     <div id="game">
 
-        <div id="topbar">
+        <!-- ========================= -->
+        <!-- HUD -->
+        <!-- ========================= -->
 
-            <div>
+        <div id="hud">
+
+            <div class="hudBox">
                 ❤️ <span id="lives">3</span>
             </div>
 
-            <div>
-                💰 <span id="coins">0</span>
+            <div class="hudBox">
+                🪙 <span id="coins">0</span>
             </div>
 
+            <div class="hudBox">
+                🏆 <span id="score">0</span>
+            </div>
+
+            <div class="hudBox">
+                📈 Lv.<span id="level">1</span>
+            </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- 3D GAME -->
+        <!-- ========================= -->
+
+        <div id="gameCanvas"></div>
+
+
+        <!-- ========================= -->
+        <!-- START SCREEN -->
+        <!-- ========================= -->
+
+        <div id="menu">
+
+            <div id="menuPanel">
+
+                <div id="gameTitle">
+                    🏃 3D RUN
+                </div>
+
+                <div id="gameSubtitle">
+                    Endless Runner
+                </div>
+
+                <button
+                    id="startButton"
+                    class="mainButton"
+                >
+                    ▶️ 开始游戏
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- GAME OVER -->
+        <!-- ========================= -->
+
+        <div id="gameOver">
+
+            <div id="gameOverPanel">
+
+                <div id="gameOverTitle">
+                    💥 GAME OVER
+                </div>
+
+                <div id="finalScore">
+                    分数：0
+                </div>
+
+                <div id="finalCoins">
+                    金币：0
+                </div>
+
+                <button
+                    id="restartButton"
+                    class="mainButton"
+                >
+                    🔄 再玩一次
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- CONTROLS -->
+        <!-- ========================= -->
+
+        <div id="controls">
+
+            <div class="leftControls">
+
+                <button
+                    id="leftButton"
+                    class="controlButton"
+                >
+                    ◀️
+                </button>
+
+                <button
+                    id="rightButton"
+                    class="controlButton"
+                >
+                    ▶️
+                </button>
+
+            </div>
+
+
+            <div class="rightControls">
+
+                <button
+                    id="jumpButton"
+                    class="controlButton jump"
+                >
+                    ⬆️
+                    <small>跳</small>
+                </button>
+
+                <button
+                    id="duckButton"
+                    class="controlButton duck"
+                >
+                    ⬇️
+                    <small>蹲</small>
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- LEVEL MESSAGE -->
+        <!-- ========================= -->
+
+        <div id="levelMessage">
+            LEVEL 1
+        </div>
+
+    </div>
+
+
+    <script src="game.js"></script>
+
+</body>
+
+</html>
             <div>
                 📏 <span id="score">0</span>
             </div>
