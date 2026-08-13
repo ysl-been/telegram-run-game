@@ -1,0 +1,208 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    background: #111;
+
+    font-family:
+        Arial,
+        sans-serif;
+
+    touch-action: none;
+}
+
+#game {
+    position: relative;
+
+    width: 100vw;
+    height: 100vh;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            #79c7ff 0%,
+            #dff5ff 70%,
+            #8bd17c 70%,
+            #5fa84e 100%
+        );
+}
+
+#canvas {
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+}
+
+#topbar {
+    position: absolute;
+
+    z-index: 10;
+
+    top: 12px;
+    left: 50%;
+
+    transform:
+        translateX(-50%);
+
+    width: 94%;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 10px 15px;
+
+    border-radius: 15px;
+
+    background:
+        rgba(0, 0, 0, 0.55);
+
+    color: white;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    backdrop-filter:
+        blur(5px);
+}
+
+#controls {
+    position: absolute;
+
+    z-index: 20;
+
+    bottom: 20px;
+
+    left: 0;
+
+    width: 100%;
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 20px;
+}
+
+.control {
+    width: 125px;
+    height: 70px;
+
+    border: none;
+
+    border-radius: 20px;
+
+    background:
+        rgba(0, 0, 0, 0.65);
+
+    color: white;
+
+    font-size: 28px;
+
+    font-weight: bold;
+
+    box-shadow:
+        0 5px 0
+        rgba(0, 0, 0, 0.3);
+
+    -webkit-tap-highlight-color:
+        transparent;
+}
+
+.control span {
+    display: block;
+
+    font-size: 13px;
+
+    margin-top: 3px;
+}
+
+.control:active {
+    transform:
+        translateY(4px);
+
+    box-shadow: none;
+}
+
+#message {
+    position: absolute;
+
+    z-index: 30;
+
+    top: 50%;
+    left: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    width: 85%;
+
+    max-width: 380px;
+
+    padding: 25px;
+
+    text-align: center;
+
+    border-radius: 25px;
+
+    background:
+        rgba(0, 0, 0, 0.75);
+
+    color: white;
+
+    backdrop-filter:
+        blur(8px);
+}
+
+#messageTitle {
+    font-size: 34px;
+
+    font-weight: bold;
+
+    margin-bottom: 10px;
+}
+
+#messageText {
+    font-size: 17px;
+
+    margin-bottom: 20px;
+}
+
+#startButton {
+    width: 100%;
+
+    padding: 15px;
+
+    border: none;
+
+    border-radius: 15px;
+
+    background: white;
+
+    color: #111;
+
+    font-size: 20px;
+
+    font-weight: bold;
+}
+
+#startButton:active {
+    transform:
+        scale(0.97);
+}
