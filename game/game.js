@@ -1,40 +1,1635 @@
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-const livesElement = document.getElementById("lives");
-const coinsElement = document.getElementById("coins");
-const scoreElement = document.getElementById("score");
-
-const message = document.getElementById("message");
-const messageTitle = document.getElementById("messageTitle");
-const messageText = document.getElementById("messageText");
-const startButton = document.getElementById("startButton");
-
-const jumpButton = document.getElementById("jumpButton");
-const duckButton = document.getElementById("duckButton");
+/* =========================================
+   3D ENDLESS RUN
+   Three.js
+========================================= */
 
 
-let gameRunning = false;
+/* =========================================
+   BASIC VARIABLES
+========================================= */
+
+const container =
+    document.getElementById("gameCanvas");
+
+
+const livesText =
+    document.getElementById("lives");
+
+
+const coinsText =
+    document.getElementById("coins");
+
+
+const scoreText =
+    document.getElementById("score");
+
+
+const levelText =
+    document.getElementById("level");
+
+
+const menu =
+    document.getElementById("menu");
+
+
+const gameOver =
+    document.getElementById("gameOver");
+
+
+const startButton =
+    document.getElementById("startButton");
+
+
+const restartButton =
+    document.getElementById("restartButton");
+
+
+const finalScore =
+    document.getElementById("finalScore");
+
+
+const finalCoins =
+    document.getElementById("finalCoins");
+
+
+const levelMessage =
+    document.getElementById("levelMessage");
+
+
+/* =========================================
+   THREE.JS SCENE
+========================================= */
+
+const scene =
+    new THREE.Scene();
+
+
+scene.background =
+    new THREE.Color(0x78c8ff);
+
+
+/* =========================================
+   CAMERA
+========================================= */
+
+const camera =
+    new THREE.PerspectiveCamera(
+        65,
+        window.innerWidth /
+        window.innerHeight,
+        0.1,
+        300
+    );
+
+
+camera.position.set(
+    0,
+    5,
+    10
+);
+
+
+camera.lookAt(
+    0,
+    1,
+    -10
+);
+
+
+/* =========================================
+   RENDERER
+========================================= */
+
+const renderer =
+    new THREE.WebGLRenderer({
+        antialias: true
+    });
+
+
+renderer.setPixelRatio(
+    Math.min(
+        window.devicePixelRatio,
+        2
+    )
+);
+
+
+renderer.setSize(
+    window.innerWidth,
+    window.innerHeight
+);
+
+
+renderer.shadowMap.enabled = true;
+
+
+renderer.shadowMap.type =
+    THREE.PCFSoftShadowMap;
+
+
+container.appendChild(
+    renderer.domElement
+);
+
+
+/* =========================================
+   LIGHTS
+========================================= */
+
+const ambientLight =
+    new THREE.HemisphereLight(
+        0xffffff,
+        0x444444,
+        2
+    );
+
+
+scene.add(
+    ambientLight
+);
+
+
+const sun =
+    new THREE.DirectionalLight(
+        0xffffff,
+        2.5
+    );
+
+
+sun.position.set(
+    10,
+    20,
+    10
+);
+
+
+sun.castShadow = true;
+
+
+scene.add(
+    sun
+);
+
+
+/* =========================================
+   GAME VARIABLES
+========================================= */
+
+let running = false;
 
 let lives = 3;
+
 let coins = 0;
+
 let score = 0;
 
-let speed = 5;
 let level = 1;
+
+let speed = 0.35;
+
+let lane = 0;
+
+let targetLane = 0;
+
+let verticalVelocity = 0;
+
+let jumping = false;
+
+let ducking = false;
 
 let spawnTimer = 0;
 
-let obstacles = [];
+let coinTimer = 0;
+
+let invincibleTimer = 0;
 
 
-const player = {
+/* =========================================
+   PLAYER
+========================================= */
 
-    x: 0,
+const player =
+    new THREE.Group();
 
-    y: 0,
 
-    width: 42,
+scene.add(
+    player
+);
+
+
+player.position.set(
+    0,
+    0,
+    5
+);
+
+
+/* Body */
+
+const bodyGeometry =
+    new THREE.BoxGeometry(
+        0.9,
+        1.5,
+        0.65
+    );
+
+
+const bodyMaterial =
+    new THREE.MeshStandardMaterial({
+        color: 0x222222,
+        roughness: 0.65
+    });
+
+
+const body =
+    new THREE.Mesh(
+        bodyGeometry,
+        bodyMaterial
+    );
+
+
+body.position.y =
+    1.45;
+
+
+body.castShadow = true;
+
+
+player.add(
+    body
+);
+
+
+/* Head */
+
+const headGeometry =
+    new THREE.SphereGeometry(
+        0.43,
+        20,
+        20
+    );
+
+
+const headMaterial =
+    new THREE.MeshStandardMaterial({
+        color: 0xffc58c
+    });
+
+
+const head =
+    new THREE.Mesh(
+        headGeometry,
+        headMaterial
+    );
+
+
+head.position.y =
+    2.5;
+
+
+head.castShadow = true;
+
+
+player.add(
+    head
+);
+
+
+/* Legs */
+
+const legGeometry =
+    new THREE.BoxGeometry(
+        0.25,
+        0.8,
+        0.3
+    );
+
+
+const legMaterial =
+    new THREE.MeshStandardMaterial({
+        color: 0x111111
+    });
+
+
+const leftLeg =
+    new THREE.Mesh(
+        legGeometry,
+        legMaterial
+    );
+
+
+const rightLeg =
+    new THREE.Mesh(
+        legGeometry,
+        legMaterial
+    );
+
+
+leftLeg.position.set(
+    -0.22,
+    0.4,
+    0
+);
+
+
+rightLeg.position.set(
+    0.22,
+    0.4,
+    0
+);
+
+
+leftLeg.castShadow = true;
+
+rightLeg.castShadow = true;
+
+
+player.add(
+    leftLeg
+);
+
+
+player.add(
+    rightLeg
+);
+
+
+/* =========================================
+   ROAD
+========================================= */
+
+const roadWidth = 9;
+
+const roadLength = 300;
+
+
+/* Road */
+
+const roadGeometry =
+    new THREE.PlaneGeometry(
+        roadWidth,
+        roadLength
+    );
+
+
+const roadMaterial =
+    new THREE.MeshStandardMaterial({
+        color: 0x303030,
+        roughness: 0.9
+    });
+
+
+const road =
+    new THREE.Mesh(
+        roadGeometry,
+        roadMaterial
+    );
+
+
+road.rotation.x =
+    -Math.PI / 2;
+
+
+road.position.z =
+    -140;
+
+
+road.receiveShadow = true;
+
+
+scene.add(
+    road
+);
+
+
+/* =========================================
+   ROAD LINES
+========================================= */
+
+const laneLines = [];
+
+
+for (
+    let i = 0;
+    i < 35;
+    i++
+) {
+
+    const geometry =
+        new THREE.BoxGeometry(
+            0.08,
+            0.03,
+            5
+        );
+
+
+    const material =
+        new THREE.MeshStandardMaterial({
+            color: 0xffffff
+        });
+
+
+    const line =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+
+    line.rotation.x =
+        -Math.PI / 2;
+
+
+    line.position.y =
+        0.025;
+
+
+    line.position.z =
+        10 -
+        i * 9;
+
+
+    line.position.x =
+        -1.5;
+
+
+    scene.add(
+        line
+    );
+
+
+    laneLines.push(
+        line
+    );
+
+
+    const line2 =
+        line.clone();
+
+
+    line2.position.x =
+        1.5;
+
+
+    scene.add(
+        line2
+    );
+
+
+    laneLines.push(
+        line2
+    );
+
+}
+
+
+/* =========================================
+   SIDE GRASS
+========================================= */
+
+const grassGeometry =
+    new THREE.PlaneGeometry(
+        80,
+        roadLength
+    );
+
+
+const grassMaterial =
+    new THREE.MeshStandardMaterial({
+        color: 0x4c9b45
+    });
+
+
+const grass =
+    new THREE.Mesh(
+        grassGeometry,
+        grassMaterial
+    );
+
+
+grass.rotation.x =
+    -Math.PI / 2;
+
+
+grass.position.y =
+    -0.02;
+
+
+grass.position.z =
+    -140;
+
+
+scene.add(
+    grass
+);
+
+
+/* =========================================
+   OBSTACLES
+========================================= */
+
+const obstacles = [];
+
+
+function createObstacle() {
+
+    const isLow =
+        Math.random() < 0.45;
+
+
+    const obstacle =
+        new THREE.Group();
+
+
+    let width;
+    let height;
+    let depth;
+
+
+    if (isLow) {
+
+        width = 2.2;
+
+        height = 0.9;
+
+        depth = 1.2;
+
+    } else {
+
+        width = 1.4;
+
+        height = 2.5;
+
+        depth = 1.2;
+
+    }
+
+
+    const geometry =
+        new THREE.BoxGeometry(
+            width,
+            height,
+            depth
+        );
+
+
+    const material =
+        new THREE.MeshStandardMaterial({
+            color:
+                isLow
+                    ? 0x9b5b24
+                    : 0xd93636,
+
+            roughness: 0.6
+        });
+
+
+    const mesh =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+
+    mesh.position.y =
+        height / 2;
+
+
+    mesh.castShadow = true;
+
+
+    obstacle.add(
+        mesh
+    );
+
+
+    const stripeGeometry =
+        new THREE.BoxGeometry(
+            width * 0.85,
+            0.12,
+            0.05
+        );
+
+
+    const stripeMaterial =
+        new THREE.MeshStandardMaterial({
+            color: 0xffffff
+        });
+
+
+    const stripe =
+        new THREE.Mesh(
+            stripeGeometry,
+            stripeMaterial
+        );
+
+
+    stripe.position.set(
+        0,
+        height * 0.65,
+        depth / 2 + 0.03
+    );
+
+
+    obstacle.add(
+        stripe
+    );
+
+
+    const laneIndex =
+        Math.floor(
+            Math.random() * 3
+        ) - 1;
+
+
+    obstacle.position.x =
+        laneIndex * 3;
+
+
+    obstacle.position.z =
+        -100;
+
+
+    scene.add(
+        obstacle
+    );
+
+
+    obstacles.push({
+        object: obstacle,
+
+        low: isLow,
+
+        lane: laneIndex
+
+    });
+
+}
+
+
+/* =========================================
+   COINS
+========================================= */
+
+const coinObjects = [];
+
+
+function createCoin() {
+
+    const geometry =
+        new THREE.TorusGeometry(
+            0.35,
+            0.12,
+            12,
+            24
+        );
+
+
+    const material =
+        new THREE.MeshStandardMaterial({
+            color: 0xffd21f,
+            metalness: 0.8,
+            roughness: 0.25
+        });
+
+
+    const coin =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+
+    const laneIndex =
+        Math.floor(
+            Math.random() * 3
+        ) - 1;
+
+
+    coin.position.set(
+        laneIndex * 3,
+        1.5,
+        -100
+    );
+
+
+    coin.rotation.y =
+        Math.PI / 2;
+
+
+    coin.castShadow = true;
+
+
+    scene.add(
+        coin
+    );
+
+
+    coinObjects.push(
+        coin
+    );
+
+}
+
+
+/* =========================================
+   INPUT
+========================================= */
+
+function moveLeft() {
+
+    if (!running) {
+        return;
+    }
+
+
+    targetLane =
+        Math.max(
+            -1,
+            targetLane - 1
+        );
+
+}
+
+
+function moveRight() {
+
+    if (!running) {
+        return;
+    }
+
+
+    targetLane =
+        Math.min(
+            1,
+            targetLane + 1
+        );
+
+}
+
+
+function jump() {
+
+    if (
+        !running ||
+        jumping
+    ) {
+        return;
+    }
+
+
+    jumping = true;
+
+    verticalVelocity =
+        0.32;
+
+}
+
+
+function duckStart() {
+
+    if (!running) {
+        return;
+    }
+
+
+    ducking = true;
+
+
+    body.scale.y =
+        0.55;
+
+
+    body.position.y =
+        1.05;
+
+
+    head.position.y =
+        1.65;
+
+}
+
+
+function duckEnd() {
+
+    ducking = false;
+
+
+    body.scale.y =
+        1;
+
+
+    body.position.y =
+        1.45;
+
+
+    head.position.y =
+        2.5;
+
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+function bindButton(
+    id,
+    callback
+) {
+
+    const button =
+        document.getElementById(id);
+
+
+    button.addEventListener(
+        "pointerdown",
+        function(event) {
+
+            event.preventDefault();
+
+            callback();
+
+        }
+    );
+
+}
+
+
+bindButton(
+    "leftButton",
+    moveLeft
+);
+
+
+bindButton(
+    "rightButton",
+    moveRight
+);
+
+
+bindButton(
+    "jumpButton",
+    jump
+);
+
+
+const duckButton =
+    document.getElementById(
+        "duckButton"
+    );
+
+
+duckButton.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        event.preventDefault();
+
+        duckStart();
+
+    }
+);
+
+
+duckButton.addEventListener(
+    "pointerup",
+    function(event) {
+
+        event.preventDefault();
+
+        duckEnd();
+
+    }
+);
+
+
+duckButton.addEventListener(
+    "pointercancel",
+    duckEnd
+);
+
+
+duckButton.addEventListener(
+    "pointerleave",
+    duckEnd
+);
+
+
+/* =========================================
+   KEYBOARD
+========================================= */
+
+document.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (
+            event.code ===
+            "ArrowLeft"
+        ) {
+
+            moveLeft();
+
+        }
+
+
+        if (
+            event.code ===
+            "ArrowRight"
+        ) {
+
+            moveRight();
+
+        }
+
+
+        if (
+            event.code ===
+            "ArrowUp" ||
+
+            event.code ===
+            "Space"
+        ) {
+
+            event.preventDefault();
+
+            jump();
+
+        }
+
+
+        if (
+            event.code ===
+            "ArrowDown"
+        ) {
+
+            duckStart();
+
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keyup",
+    function(event) {
+
+        if (
+            event.code ===
+            "ArrowDown"
+        ) {
+
+            duckEnd();
+
+        }
+
+    }
+);
+
+
+/* =========================================
+   COLLISION
+========================================= */
+
+function checkObstacleCollision(
+    obstacle
+) {
+
+    const dx =
+        Math.abs(
+            player.position.x -
+            obstacle.object.position.x
+        );
+
+
+    const dz =
+        Math.abs(
+            player.position.z -
+            obstacle.object.position.z
+        );
+
+
+    if (
+        dx < 1.1 &&
+        dz < 1.2
+    ) {
+
+        if (
+            obstacle.low &&
+            ducking
+        ) {
+
+            return false;
+
+        }
+
+
+        if (
+            !obstacle.low &&
+            jumping
+        ) {
+
+            return false;
+
+        }
+
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================
+   HIT PLAYER
+========================================= */
+
+function hitPlayer() {
+
+    if (
+        invincibleTimer > 0
+    ) {
+
+        return;
+
+    }
+
+
+    lives--;
+
+    invincibleTimer =
+        100;
+
+
+    livesText.textContent =
+        lives;
+
+
+    player.visible = false;
+
+
+    setTimeout(
+        function() {
+
+            player.visible = true;
+
+        },
+        120
+    );
+
+
+    if (
+        navigator.vibrate
+    ) {
+
+        navigator.vibrate(
+            180
+        );
+
+    }
+
+
+    if (
+        lives <= 0
+    ) {
+
+        endGame();
+
+    }
+
+}
+
+
+/* =========================================
+   UPDATE PLAYER
+========================================= */
+
+function updatePlayer() {
+
+    const targetX =
+        targetLane * 3;
+
+
+    player.position.x +=
+        (
+            targetX -
+            player.position.x
+        ) * 0.18;
+
+
+    if (jumping) {
+
+        player.position.y +=
+            verticalVelocity;
+
+
+        verticalVelocity -=
+            0.018;
+
+
+        if (
+            player.position.y <= 0
+        ) {
+
+            player.position.y = 0;
+
+            verticalVelocity = 0;
+
+            jumping = false;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================
+   UPDATE OBSTACLES
+========================================= */
+
+function updateObstacles() {
+
+    for (
+        let i =
+            obstacles.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const obstacle =
+            obstacles[i];
+
+
+        /*
+         * 障碍物从前方冲向玩家
+         */
+
+        obstacle.object.position.z +=
+            speed;
+
+
+        if (
+            checkObstacleCollision(
+                obstacle
+            )
+        ) {
+
+            hitPlayer();
+
+
+            scene.remove(
+                obstacle.object
+            );
+
+
+            obstacles.splice(
+                i,
+                1
+            );
+
+
+            continue;
+
+        }
+
+
+        if (
+            obstacle.object.position.z >
+            15
+        ) {
+
+            scene.remove(
+                obstacle.object
+            );
+
+
+            obstacles.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================
+   UPDATE COINS
+========================================= */
+
+function updateCoins() {
+
+    for (
+        let i =
+            coinObjects.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const coin =
+            coinObjects[i];
+
+
+        coin.position.z +=
+            speed;
+
+
+        coin.rotation.z +=
+            0.08;
+
+
+        const dx =
+            Math.abs(
+                player.position.x -
+                coin.position.x
+            );
+
+
+        const dz =
+            Math.abs(
+                player.position.z -
+                coin.position.z
+            );
+
+
+        const dy =
+            Math.abs(
+                player.position.y +
+                1.5 -
+                coin.position.y
+            );
+
+
+        if (
+            dx < 1 &&
+            dz < 1.2 &&
+            dy < 1
+        ) {
+
+            coins++;
+
+
+            coinsText.textContent =
+                coins;
+
+
+            scene.remove(
+                coin
+            );
+
+
+            coinObjects.splice(
+                i,
+                1
+            );
+
+
+            continue;
+
+        }
+
+
+        if (
+            coin.position.z >
+            15
+        ) {
+
+            scene.remove(
+                coin
+            );
+
+
+            coinObjects.splice(
+                i,
+                1
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================
+   ROAD ANIMATION
+========================================= */
+
+function updateRoad() {
+
+    laneLines.forEach(
+        line => {
+
+            line.position.z +=
+                speed;
+
+
+            if (
+                line.position.z >
+                15
+            ) {
+
+                line.position.z -=
+                    315;
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   SPAWNING
+========================================= */
+
+function updateSpawner() {
+
+    spawnTimer--;
+
+
+    if (
+        spawnTimer <= 0
+    ) {
+
+        createObstacle();
+
+
+        spawnTimer =
+            Math.max(
+                45,
+                100 -
+                level * 5
+            );
+
+    }
+
+
+    coinTimer--;
+
+
+    if (
+        coinTimer <= 0
+    ) {
+
+        createCoin();
+
+
+        coinTimer =
+            80 +
+            Math.floor(
+                Math.random() * 70
+            );
+
+    }
+
+}
+
+
+/* =========================================
+   LEVEL
+========================================= */
+
+function updateLevel() {
+
+    const newLevel =
+        Math.floor(
+            score / 100
+        ) + 1;
+
+
+    if (
+        newLevel !== level
+    ) {
+
+        level =
+            newLevel;
+
+
+        speed =
+            0.35 +
+            (level - 1) * 0.06;
+
+
+        levelText.textContent =
+            level;
+
+
+        showLevel(
+            level
+        );
+
+    }
+
+}
+
+
+/* =========================================
+   LEVEL MESSAGE
+========================================= */
+
+function showLevel(
+    number
+) {
+
+    levelMessage.textContent =
+        "LEVEL " + number;
+
+
+    levelMessage.classList.add(
+        "show"
+    );
+
+
+    setTimeout(
+        function() {
+
+            levelMessage.classList.remove(
+                "show"
+            );
+
+        },
+        1300
+    );
+
+}
+
+
+/* =========================================
+   SCORE
+========================================= */
+
+function updateScore() {
+
+    score +=
+        speed * 0.08;
+
+
+    scoreText.textContent =
+        Math.floor(score);
+
+}
+
+
+/* =========================================
+   GAME UPDATE
+========================================= */
+
+function update() {
+
+    if (!running) {
+        return;
+    }
+
+
+    if (
+        invincibleTimer > 0
+    ) {
+
+        invincibleTimer--;
+
+    }
+
+
+    updatePlayer();
+
+    updateObstacles();
+
+    updateCoins();
+
+    updateRoad();
+
+    updateSpawner();
+
+    updateScore();
+
+    updateLevel();
+
+}
+
+
+/* =========================================
+   START GAME
+========================================= */
+
+function startGame() {
+
+    obstacles.forEach(
+        item => {
+
+            scene.remove(
+                item.object
+            );
+
+        }
+    );
+
+
+    obstacles.length = 0;
+
+
+    coinObjects.forEach(
+        coin => {
+
+            scene.remove(
+                coin
+            );
+
+        }
+    );
+
+
+    coinObjects.length = 0;
+
+
+    lives = 3;
+
+    coins = 0;
+
+    score = 0;
+
+    level = 1;
+
+    speed = 0.35;
+
+    lane = 0;
+
+    targetLane = 0;
+
+    jumping = false;
+
+    ducking = false;
+
+    verticalVelocity = 0;
+
+    spawnTimer = 50;
+
+    coinTimer = 80;
+
+    invincibleTimer = 0;
+
+
+    player.position.set(
+        0,
+        0,
+        5
+    );
+
+
+    duckEnd();
+
+
+    livesText.textContent =
+        lives;
+
+
+    coinsText.textContent =
+        coins;
+
+
+    scoreText.textContent =
+        0;
+
+
+    levelText.textContent =
+        1;
+
+
+    menu.style.display =
+        "none";
+
+
+    gameOver.style.display =
+        "none";
+
+
+    running = true;
+
+}
+
+
+/* =========================================
+   END GAME
+========================================= */
+
+function endGame() {
+
+    running = false;
+
+
+    finalScore.textContent =
+        "分数：" +
+        Math.floor(score);    width: 42,
 
     height: 55,
 
